@@ -6,6 +6,9 @@ import { ConfigService } from '@nestjs/config';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // Load ConfigService
+  const configService = app.get(ConfigService);
+
   // Enable validation globally
   app.useGlobalPipes(
     new ValidationPipe({
@@ -15,14 +18,13 @@ async function bootstrap() {
     }),
   );
 
-  // Enable CORS
+  // Enable CORS using environment variable
   app.enableCors({
-    origin: 'http://localhost:8080', // Ganti dengan URL frontend Anda
-    credentials: true, // Jika diperlukan
+    origin: configService.get<string>('FRONTEND_URL'), // Ambil FRONTEND_URL dari .env
+    credentials: true, // Jika frontend memerlukan cookie atau header otentikasi
   });
 
   // Use ConfigService to get PORT
-  const configService = app.get(ConfigService);
   const port = configService.get<number>('PORT') ?? 3000;
 
   await app.listen(port);
